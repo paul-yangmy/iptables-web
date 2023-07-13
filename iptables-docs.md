@@ -42,11 +42,11 @@ Netfilter所设置的规则是存放在内核空间中的，而**iptables是一�
 
 iptables开启后，数据报文从进入服务器到出来会经过5道关卡，分别为Prerouting(路由前)、Input(输入)、Outpu(输出)、Forward(转发)、Postrouting(路由后)：
 
-![数据流转](https://doc.xujianqq.com.cn/doc/03/ae2ec6f73b5dd9849c93dfc074cac997.jpg)
+![数据流转](./imgs/数据流转说明.jpg)
 
 每一道关卡中有多个规则，数据报文必须按顺序一个一个匹配这些规则，这些规则串起来就像一条链，所以我们把这些关卡都叫`链`：
 
-![chain](https://doc.xujianqq.com.cn/doc/03/e3ffc9afdb8cd8bd450ed917e3fe50e3.png)
+![chain](./imgs/链规则说明.png)
 
 - **INPUT链**：当接收到防火墙本机地址的数据包(入站)时，应用此链中的规则；
 
