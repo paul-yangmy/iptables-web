@@ -2,8 +2,6 @@ import argparse
 import logging
 import os
 import re
-import http.server
-import socketserver
 import sys
 
 logging.basicConfig(
@@ -53,5 +51,8 @@ def init():
 
 if __name__ == "__main__":
     logger = logging.getLogger(__name__)
+    if not sys.platform.startswith('linux'):
+        logger.error("只支持 Linux 系统")
+        sys.exit(1)
     init()
-    # 这里可以继续编写你的主程序逻辑
+    
