@@ -1,5 +1,7 @@
+import os
 import subprocess
 import logging
+import tempfile
 
 logger = logging.getLogger(__name__)
 
@@ -36,3 +38,33 @@ class IptablesV4CMD:
         cmd = ["sh", "-c", f"{self.restore_binary} < {fileName}"]
         return shell_exec(cmd)
 
+    def export_file(self, table, chain):
+        args = []
+        if table:
+            args.append(table)
+        if chain:
+            args.append(chain)
+        return self.save(*args)
+
+    def import_file(self, rule):
+        if not rule:
+            return None
+        try:
+            # 使用 NamedTemporaryFile 创建了一个临时文件, 使用prefix来指定临时文件的前缀，使用suffix来指定临时文件的后缀
+            with tempfile.NamedTemporaryFile(mode="w", prefix='iptables', suffix='.rule', delete=False) as temp_file:
+                temp_file.write(rule)
+                # temp_file.name 来获取临时文件的完整路径
+                temp_file_path = temp_file.name
+            # 执行规则的导入操作，并在导入完成后删除临时文件
+            _, error = self.restore(temp_file_path)
+            if error:
+                raise ValueError(f"Import rule error. err: {error}")
+        finally:
+            os.remove(temp_file_path)
+
+    def delete_rule(self, table, chain, id):
+        if not table or not chain or not id:
+            return ValueError(f"DeleteRule args error. table:{table} chain:{chain} id:{id}")
+
+        _, error = self.iptables("-t", table, "-D", chain, id)
+        return error
