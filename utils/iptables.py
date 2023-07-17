@@ -18,12 +18,12 @@ def shell_exec(cmd):
 
 
 class IptablesV4CMD:
-    def __init__(self, binary, save_binary, restore_binary, protocol):
+    def __init__(self, binary='iptables',
+                 save_binary='iptables-save',
+                 restore_binary='iptables-restore'):
         self.binary = binary
         self.save_binary = save_binary
         self.restore_binary = restore_binary
-        self.protocol = protocol
-        self.exec_cmd = None
 
     def exec(self, *param):
         args = [arg.strip() for arg in param if arg.strip()]
@@ -62,9 +62,9 @@ class IptablesV4CMD:
         finally:
             os.remove(temp_file_path)
 
-    def delete_rule(self, table, chain, id):
-        if not table or not chain or not id:
-            return ValueError(f"DeleteRule args error. table:{table} chain:{chain} id:{id}")
-
-        _, error = self.iptables("-t", table, "-D", chain, id)
+    def delete_rule(self, table, chain, table_id):
+        if not table or not chain or not table_id:
+            return ValueError(f"DeleteRule args error. table:{table} chain:{chain} table_id:{table_id}")
+        cmd = [self.binary, "-t", table, "-D", chain, table_id]
+        _, error = self.iptables("-t", table, "-D", chain, table_id)
         return error
