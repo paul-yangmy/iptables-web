@@ -20,8 +20,8 @@ def shell_exec(cmd):
 
 class IptablesV4CMD:
     def __init__(self, binary='sudo iptables',
-                 save_binary='sudo iptables-save',
-                 restore_binary='sudo iptables-restore'):
+                 save_binary='iptables-save',
+                 restore_binary='iptables-restore'):
         self.binary = binary
         self.save_binary = save_binary
         self.restore_binary = restore_binary
@@ -40,14 +40,14 @@ class IptablesV4CMD:
         cmd = [self.binary, *args]
         return shell_exec(cmd)
 
-    # sh -c "iptables-save > iptables-rules.txt"
+    # sudo sh -c "iptables-save > iptables-rules.txt"
     def save(self, *args):
-        cmd = ["sh", "-c", f"{self.save_binary} {' '.join(args)}"]
+        cmd = ["sudo", "sh", "-c", f"{self.save_binary} {' '.join(args)}"]
         return shell_exec(cmd)
 
-    # sh -c "iptables-restore < iptables-rules.txt"
+    # sudo sh -c "iptables-restore < iptables-rules.txt"
     def restore(self, fileName):
-        cmd = ["sh", "-c", f"{self.restore_binary} < {fileName}"]
+        cmd = ["sudo", "sh", "-c", f"{self.restore_binary} < {fileName}"]
         return shell_exec(cmd)
 
     # 导出
@@ -80,7 +80,7 @@ class IptablesV4CMD:
         finally:
             os.remove(temp_file_path)
 
-    # 删除 sudo iptables -D INPUT ${行数}
+    # 删除 iptables -D INPUT ${行数}
     def delete_rule(self, table, chain, table_id):
         if not table or not chain or not table_id:
             return ValueError(f"DeleteRule args error. table:{table} chain:{chain} table_id:{table_id}")
