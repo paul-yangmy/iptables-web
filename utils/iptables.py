@@ -25,6 +25,9 @@ class IptablesV4CMD:
         self.binary = binary
         self.save_binary = save_binary
         self.restore_binary = restore_binary
+    # iptables命令支持配置不同的表(table),每个表用于管理不同类型的规则.
+    # 常见的表包括filter表（默认表，用于过滤规则）、nat表（用于网络地址转换）、mangle表（用于修改报文）、raw表（用于处理原始数据包）等。
+    # 如果使用iptables命令而没有指定-t参数,iptables将默认使用filter表.
 
     # 获取iptables版本信息
     def version(self):
@@ -78,9 +81,6 @@ class IptablesV4CMD:
             os.remove(temp_file_path)
 
     # 删除 sudo iptables -D INPUT ${行数}
-    # iptables命令支持配置不同的表(table),每个表用于管理不同类型的规则。
-    # 常见的表包括filter表（默认表，用于过滤规则）、nat表（用于网络地址转换）、mangle表（用于修改报文）、raw表（用于处理原始数据包）等。
-    # 如果使用iptables命令而没有指定-t参数,iptables将默认使用filter表.
     def delete_rule(self, table, chain, table_id):
         if not table or not chain or not table_id:
             return ValueError(f"DeleteRule args error. table:{table} chain:{chain} table_id:{table_id}")
