@@ -25,6 +25,10 @@ class IptablesV4CMD:
         self.save_binary = save_binary
         self.restore_binary = restore_binary
 
+    def version(self):
+        cmd = [self.binary, "--version"]
+        return shell_exec(cmd)
+
     def exec(self, *param):
         args = [arg.strip() for arg in param if arg.strip()]
         cmd = [self.binary, *args]
