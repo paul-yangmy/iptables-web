@@ -19,9 +19,9 @@ def shell_exec(cmd):
 
 
 class IptablesV4CMD:
-    def __init__(self, binary='iptables',
-                 save_binary='iptables-save',
-                 restore_binary='iptables-restore'):
+    def __init__(self, binary='sudo iptables',
+                 save_binary='sudo iptables-save',
+                 restore_binary='sudo iptables-restore'):
         self.binary = binary
         self.save_binary = save_binary
         self.restore_binary = restore_binary
