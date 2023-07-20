@@ -87,3 +87,7 @@ class IptablesV4CMD:
         cmd = [self.binary, "-D", chain, table_id]
         _, error = self.iptables(cmd)
         return error
+
+
+
+
