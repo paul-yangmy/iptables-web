@@ -4,6 +4,8 @@ import os
 import re
 import sys
 
+from utils.iptables import new_iptables
+
 logging.basicConfig(
     level=logging.DEBUG,
     filename="./logger.log",
@@ -55,4 +57,8 @@ if __name__ == "__main__":
         logger.error("只支持 Linux 系统")
         sys.exit(1)
     init()
+    # 初始化IptablesV4CMD类
+    ipt4cmd = new_iptables
+
+
     
