@@ -1,21 +1,14 @@
 import os
-import subprocess
 import logging
 import tempfile
+
+from utils.func import shell_exec, split_and_trim_space
 
 logger = logging.getLogger(__name__)
 
 
-def shell_exec(cmd):
-    # 通过 capture_output=True 参数捕获命令的标准输出和标准错误
-    # run函数第一个参数为要执行的命令和命令参数字符串列表（args），如果使用字符串需要使用shell=True参数
-    process = subprocess.run(cmd, capture_output=True, text=True)
-    # 返回不为 0，则表示执行出错
-    if process.returncode != 0:
-        err_msg = f"exec: [{' '.join(cmd)}] err: {process.stderr}"
-        logger.error(err_msg)
-        return "", ValueError(err_msg)
-    return process.stdout.strip(), None
+def new_iptables():
+    return IptablesV4CMD()
 
 
 class IptablesV4CMD:
@@ -25,6 +18,7 @@ class IptablesV4CMD:
         self.binary = binary
         self.save_binary = save_binary
         self.restore_binary = restore_binary
+
     # iptables命令支持配置不同的表(table),每个表用于管理不同类型的规则.
     # 常见的表包括filter表（默认表，用于过滤规则）、nat表（用于网络地址转换）、mangle表（用于修改报文）、raw表（用于处理原始数据包）等。
     # 如果使用iptables命令而没有指定-t参数,iptables将默认使用filter表.
@@ -76,18 +70,37 @@ class IptablesV4CMD:
             # 执行规则的导入操作，并在导入完成后删除临时文件
             _, error = self.restore(temp_file_path)
             if error:
-                raise ValueError(f"Import rule error. err: {error}")
+                err_msg = f"Import rule error. err: {error}"
+                logger.error(err_msg)
+                raise ValueError(err_msg)
         finally:
             os.remove(temp_file_path)
 
     # 删除 iptables -D INPUT ${行数}
-    def delete_rule(self, table, chain, table_id):
-        if not table or not chain or not table_id:
-            return ValueError(f"DeleteRule args error. table:{table} chain:{chain} table_id:{table_id}")
-        cmd = [self.binary, "-D", chain, table_id]
-        _, error = self.iptables(cmd)
+    def delete_rule(self, chain, rule_id):
+        if not chain or not rule_id:
+            err_msg = f"DeleteRule args error. chain:{chain} table_id:{rule_id}"
+            logger.error(err_msg)
+            return ValueError(err_msg)
+        cmd = [self.binary, "-D", chain, rule_id]
+        _, error = shell_exec(cmd)
         return error
 
-
-
-
+    # sudo sh -c "iptables-save > iptables-rules.txt"
+    def get_rule_info(self, chain, rule_id):
+        if not chain or not rule_id:
+            err_msg = "GetRuleInfo args error. chain:{}, id:{}".format(chain, rule_id)
+            logger.error(err_msg)
+            return "", ValueError(err_msg)
+        try:
+            output = self.save(chain, rule_id)
+            rule_list = split_and_trim_space(output, "\n")
+            rule_id_int = int(rule_id)
+            if len(rule_list) < rule_id_int:
+                err_msg = "GetRuleInfo rule not found"
+                logger.error(err_msg)
+                return "", ValueError(err_msg)
+            return rule_list[rule_id_int - 1], None
+        except Exception as e:
+            logger.error(e)
+            return "", e

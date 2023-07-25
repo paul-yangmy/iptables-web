@@ -1,13 +1,28 @@
 import random
+import subprocess
 import time
 import json
 import http.server
 import json
 import hashlib
 
+from utils.iptables import logger
+
 
 def init():
     random.seed(time.time())
+
+
+def shell_exec(cmd):
+    # 通过 capture_output=True 参数捕获命令的标准输出和标准错误
+    # run函数第一个参数为要执行的命令和命令参数字符串列表（args），如果使用字符串需要使用shell=True参数
+    process = subprocess.run(cmd, capture_output=True, text=True)
+    # 返回不为 0，则表示执行出错
+    if process.returncode != 0:
+        err_msg = f"exec: [{' '.join(cmd)}] err: {process.stderr}"
+        logger.error(err_msg)
+        return "", ValueError(err_msg)
+    return process.stdout.strip(), None
 
 
 def split_and_trim_space(s, sep):
